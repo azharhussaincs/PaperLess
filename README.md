@@ -50,7 +50,7 @@ If you want to use Docker but keep my AI enhancements, you **must clone the code
 
     **Find the "volumes" section**: Look for the `webserver:` section, then the `volumes:` list underneath it.
 
-    **Add the line**: Copy and paste the line so it looks like this:
+    **Uncomment the source line**: Look for the `# - ./src:/usr/src/paperless/src` line in the `volumes` section and remove the `#` at the beginning so it looks like this:
     ```yaml
     services:
       webserver:
@@ -58,15 +58,15 @@ If you want to use Docker but keep my AI enhancements, you **must clone the code
         volumes:
           - data:/usr/src/paperless/data
           - media:/usr/src/paperless/media
-          - ./src:/usr/src/paperless/src  # <-- ADD THIS LINE HERE
+          - ./src:/usr/src/paperless/src  # <-- UNCOMMENT THIS LINE HERE
     ```
 
     **Why is this done?**
-    By adding this line to the file, you are telling Docker: *"Instead of using the default code inside the download, use the AI-Enhanced code I have in my local `src` folder."*
+    By uncommenting this line, you are telling Docker: *"Instead of using the default code inside the download, use the AI-Enhanced code I have in my local `src` folder."*
 
     **Summary:**
     - **File Location:** `docker-compose.yml` (in project root)
-    - **File Edit:** Add `- ./src:/usr/src/paperless/src` inside `volumes` section.
+    - **File Edit:** Uncomment `- ./src:/usr/src/paperless/src` inside `volumes` section.
     - **Terminal Command:** Once saved, run `docker compose up -d`.
 
 4.  **Start and Create User:**

@@ -39,7 +39,7 @@ services:
       - media:/usr/src/paperless/media
       - ./export:/usr/src/paperless/export
       - ./consume:/usr/src/paperless/consume
-      - ./src:/usr/src/paperless/src
+      # - ./src:/usr/src/paperless/src  # <-- UNCOMMENT THIS LINE TO ENABLE AI ENHANCEMENTS
     env_file: docker-compose.env
     environment:
       PAPERLESS_REDIS: redis://broker:6379
