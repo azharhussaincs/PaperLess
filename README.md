@@ -26,6 +26,45 @@ The easiest way to get started is using **Docker**. No complex installation requ
 
 ---
 
+## 🚀 How to Run Your Enhanced Code on Another System
+
+To ensure all the **AI features** I added (Smart Model Selection, Auto-Start, etc.) work on a new system, you have two choices:
+
+### Option 1: Using Docker (Recommended)
+If you want to use Docker but keep my AI enhancements, you **must clone the code** because the standard Docker image doesn't include my custom changes.
+
+1.  **Clone your repository:**
+    ```bash
+    git clone https://github.com/azharhussaincs/PaperLess.git
+    cd PaperLess
+    ```
+2.  **Setup Configuration:**
+    ```bash
+    cp docker/compose/docker-compose.sqlite.yml docker-compose.yml
+    cp docker/compose/docker-compose.env docker-compose.env
+    ```
+3.  **Modify `docker-compose.yml` to use your code:**
+    Open `docker-compose.yml` and add this line under `webserver:` -> `volumes:`:
+    ```yaml
+    - ./src:/usr/src/paperless/src
+    ```
+    *This tells Docker to use your local code instead of the one inside the image.*
+
+4.  **Start and Create User:**
+    ```bash
+    docker compose up -d
+    docker exec -it paperless-webserver-1 python3 manage.py createsuperuser
+    ```
+
+### Option 2: Clone and Run Locally (Development)
+If you don't want to use Docker:
+1.  **Clone the code:** `git clone ...`
+2.  **Install dependencies:** `uv sync --all-extras`
+3.  **Run migrations:** `python3 manage.py migrate`
+4.  **Start server:** `python3 manage.py runserver`
+
+---
+
 ## AI Features (Zero-Config)
 If you have **Ollama** installed on your computer, Paperless-ngx will **automatically detect and start it** (if possible) and use your largest available model to:
 - 📝 **Summarize** your documents automatically.
