@@ -6,7 +6,9 @@
 
 The easiest way to get started is using **Docker**. No complex installation required!
 
-### 1. Simple Docker Start
+### 1. Simple Docker Start (Standard Version)
+> (Note: This runs the standard Paperless without the AI enhancements.)
+
 1. **Copy configuration files**:
    ```bash
    cp docker/compose/docker-compose.sqlite.yml docker-compose.yml
@@ -44,11 +46,28 @@ If you want to use Docker but keep my AI enhancements, you **must clone the code
     cp docker/compose/docker-compose.env docker-compose.env
     ```
 3.  **Modify `docker-compose.yml` to use your code:**
-    Open `docker-compose.yml` and add this line under `webserver:` -> `volumes:`:
+    The `docker-compose.yml` file is located in the root of your `PaperLess` folder. Open it with a text editor (like Notepad, TextEdit, or VS Code).
+
+    **Find the "volumes" section**: Look for the `webserver:` section, then the `volumes:` list underneath it.
+
+    **Add the line**: Copy and paste the line so it looks like this:
     ```yaml
-    - ./src:/usr/src/paperless/src
+    services:
+      webserver:
+        # ... other settings ...
+        volumes:
+          - data:/usr/src/paperless/data
+          - media:/usr/src/paperless/media
+          - ./src:/usr/src/paperless/src  # <-- ADD THIS LINE HERE
     ```
-    *This tells Docker to use your local code instead of the one inside the image.*
+
+    **Why is this done?**
+    By adding this line to the file, you are telling Docker: *"Instead of using the default code inside the download, use the AI-Enhanced code I have in my local `src` folder."*
+
+    **Summary:**
+    - **File Location:** `docker-compose.yml` (in project root)
+    - **File Edit:** Add `- ./src:/usr/src/paperless/src` inside `volumes` section.
+    - **Terminal Command:** Once saved, run `docker compose up -d`.
 
 4.  **Start and Create User:**
     ```bash
@@ -154,8 +173,8 @@ For those who want to run it without Docker:
 
 To enable AI features, simply install Ollama:
 1. **Install Ollama**: [ollama.com](https://ollama.com)
-2. **Download a model**: `ollama pull llama3.1`
-3. **Done!** Paperless-ngx will find it automatically.
+2. **Download a model**: `ollama pull llama3.1` (or any model you prefer).
+3. **Done!** Paperless-ngx will find it automatically and pick the largest one if you have several.
 
 ### Linux Users (Docker)
 If your AI isn't working in Docker on Linux, run:
