@@ -52,8 +52,18 @@ class OllamaResolver:
             fallbacks.insert(0, env_endpoint)
 
         for endpoint in fallbacks:
+            # First check if it's already running
             if self.health_check(endpoint):
                 logger.info(f"Ollama detected and active at {endpoint}")
+                self.cached_endpoint = endpoint
+                self.last_check = now
+                return endpoint
+
+            # If not running, attempt to "trigger" it by waiting (in case it's just starting)
+            # or by attempting to reach it with a longer timeout/retry.
+            # On some systems, just attempting to connect might wake it up if it's a socket-activated service.
+            if self.health_check(endpoint, retry=True):
+                logger.info(f"Ollama started and detected at {endpoint}")
                 self.cached_endpoint = endpoint
                 self.last_check = now
                 return endpoint
@@ -67,17 +77,18 @@ class OllamaResolver:
         """
         Returns the preferred_model if it exists on the endpoint.
         Otherwise returns the largest available model based on size.
-        Returns 'llama3.1' as a last resort fallback.
+        If no models are installed, returns None.
         """
         if not endpoint:
-            return preferred_model or "llama3.1"
+            return None
 
         try:
             response = requests.get(f"{endpoint.rstrip('/')}/api/tags", timeout=2)
             if response.status_code == 200:
                 models_data = response.json().get('models', [])
                 if not models_data:
-                    return preferred_model or "llama3.1"
+                    logger.warning(f"Ollama connected at {endpoint} but no models are installed.")
+                    return None
 
                 model_names = [m['name'] for m in models_data]
 
@@ -103,18 +114,25 @@ class OllamaResolver:
             logger.debug(f"Error fetching models from Ollama: {e}")
             pass
 
-        return preferred_model or "llama3.1"
+        return None
 
-    def health_check(self, endpoint):
+    def health_check(self, endpoint, retry=False):
         """
         Performs a lightweight health check on the Ollama endpoint.
+        If retry is True, it will attempt to wait for Ollama to start.
         """
-        try:
-            # We use /api/tags as a lightweight check that confirms Ollama is responsive
-            response = requests.get(f"{endpoint.rstrip('/')}/api/tags", timeout=2)
-            return response.status_code == 200
-        except Exception:
-            return False
+        max_retries = 5 if retry else 1
+        for i in range(max_retries):
+            try:
+                # We use /api/tags as a lightweight check that confirms Ollama is responsive
+                response = requests.get(f"{endpoint.rstrip('/')}/api/tags", timeout=2)
+                if response.status_code == 200:
+                    return True
+            except Exception:
+                if i < max_retries - 1:
+                    logger.info(f"Waiting for Ollama at {endpoint} (attempt {i+1}/{max_retries})...")
+                    time.sleep(2)
+        return False
 
 def get_ollama_endpoint(manual_endpoint=None):
     return OllamaResolver().get_endpoint(manual_endpoint)

@@ -27,12 +27,17 @@ The easiest way to get started is using **Docker**. No complex installation requ
 ---
 
 ## AI Features (Zero-Config)
-If you have **Ollama** installed on your computer, Paperless-ngx will **automatically detect it** and use your largest available model to:
+If you have **Ollama** installed on your computer, Paperless-ngx will **automatically detect and start it** (if possible) and use your largest available model to:
 - 📝 **Summarize** your documents automatically.
 - 🏷️ **Suggest Tags** for better organization.
 - 📂 **Auto-Title** files based on content.
 
-*No setup needed—it just works if Ollama is running!*
+### How it works:
+1. **Auto-Start**: During startup, Paperless-ngx checks if Ollama is running. If it's installed but idle, it will wait for it to wake up.
+2. **Smart Model Selection**: It scans all your installed models (e.g., `llama3:8b`, `deepseek:32b`) and **automatically picks the largest/best one** to ensure high-quality AI results.
+3. **Automatic Fallback**: If no models are found, it will warn you in the logs and suggest pulling a default model.
+
+*No setup needed—it just works if Ollama is installed!*
 
 ---
 

@@ -33,8 +33,8 @@ class AIClient:
             endpoint = get_ollama_endpoint(self.settings.llm_endpoint)
             if not endpoint:
                 raise ValueError(
-                    "Ollama endpoint not found. Please ensure Ollama is running "
-                    "or set PAPERLESS_AI_LLM_ENDPOINT.",
+                    "Ollama not found. Please ensure Ollama is installed and running "
+                    "on your host machine. If you are on Linux, check that OLLAMA_HOST is set to 0.0.0.0.",
                 )
 
             validate_outbound_http_url(
@@ -43,6 +43,14 @@ class AIClient:
             )
 
             model_name = get_ollama_model(endpoint, self.settings.llm_model)
+            if not model_name:
+                logger.warning(
+                    "No models found in Ollama at %s. AI features will be limited. "
+                    "Try running: ollama pull llama3.1",
+                    endpoint,
+                )
+                # Fallback to a default if nothing is found, so at least it tries
+                model_name = self.settings.llm_model or "llama3.1"
 
             return Ollama(
                 model=model_name,
